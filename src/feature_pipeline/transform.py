@@ -42,13 +42,8 @@ def run_transformation(
     out_dir = Path(output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    # 1. Load Cleaned Data
-    print("   Loading cleaned data...")
-    train = pd.read_csv(in_dir / "train_cleaned.csv")
-    val_df = pd.read_csv(in_dir / "val_cleaned.csv")
-    test_df = pd.read_csv(in_dir / "test_cleaned.csv")
-
-    # 2. Define Transformers
+def create_preprocessor():
+    """Create the ColumnTransformer pipeline."""
     numerical_transformer = StandardScaler()
     categorical_transformer = OneHotEncoder(handle_unknown='ignore', sparse_output=False)
 
@@ -59,6 +54,25 @@ def run_transformation(
         ],
         remainder='drop' 
     )
+    return preprocessor
+
+def run_transformation(
+    input_dir: Path | str = INTERIM_DIR,
+    output_dir: Path | str = PROCESSED_DIR
+):
+    print("Starting Feature Transformation...")
+    in_dir = Path(input_dir)
+    out_dir = Path(output_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    # 1. Load Cleaned Data
+    print("   Loading cleaned data...")
+    train = pd.read_csv(in_dir / "train_cleaned.csv")
+    val_df = pd.read_csv(in_dir / "val_cleaned.csv")
+    test_df = pd.read_csv(in_dir / "test_cleaned.csv")
+
+    # 2. Define Transformers
+    preprocessor = create_preprocessor()
 
     # 3. Fit on Train (The Artifact)
     print("   Fitting Preprocessor on Train...")
