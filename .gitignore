@@ -2,6 +2,19 @@
 /data/
 !data/**/*.dvc       
 !data/**/.gitignore
+
+# MLflow
+mlruns/
+!mlruns.dvc       <-- Whitelist the DVC file in root
+!mlruns/**/*.dvc  <-- Whitelist DVC files inside (just in case)
+!mlruns/.gitignore
+
+# Models
+models/
+!models.dvc       <-- Whitelist the DVC file in root
+!models/**/*.dvc  <-- Whitelist DVC files inside (just in case)
+!models/.gitignore
+!models/xgboost_best.joblib
 # Mac OS-specific storage files
 .DS_Store
 
@@ -190,3 +203,4 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+/models
