@@ -43,7 +43,17 @@ format:
 ## Run tests
 .PHONY: test
 test:
-	python -m pytest tests
+	python -m pytest tests/test_feature_pipeline.py
+
+## Run FastAPI Server
+.PHONY: run-api
+run-api:
+	uvicorn src.app.main:app --reload
+
+## Run Streamlit UI
+.PHONY: run-ui
+run-ui:
+	streamlit run src/app_ui/home.py
 ## Download Data from storage system
 .PHONY: sync_data_down
 sync_data_down:

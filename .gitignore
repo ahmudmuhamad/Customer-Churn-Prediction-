@@ -15,6 +15,9 @@ models/
 !models/**/*.dvc  <-- Whitelist DVC files inside (just in case)
 !models/.gitignore
 !models/xgboost_best.joblib
+models/
+!models/*.dvc       <-- "!" means "Allow this specific pattern"
+!models/.gitignore
 # Mac OS-specific storage files
 .DS_Store
 
