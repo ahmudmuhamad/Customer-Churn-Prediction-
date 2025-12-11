@@ -33,6 +33,7 @@ def test_load_artifacts(dummy_artifacts):
     """Test loading of artifacts."""
     with patch("src.inference_pipeline.inference.PROJECT_ROOT", dummy_artifacts), \
          patch("src.inference_pipeline.inference.ARTIFACTS_DIR", dummy_artifacts / "models" / "artifacts"), \
+         patch("src.inference_pipeline.inference.MODEL_PATH", dummy_artifacts / "models" / "xgboost_production.joblib"), \
          patch("src.inference_pipeline.inference.joblib.load") as mock_load:
         
         # joblib.load is called twice: model, preprocessor
