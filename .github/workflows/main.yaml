@@ -1,0 +1,104 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  AWS_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+  
+  # NEW NAMES for Churn Project
+  ECR_REPO_API: churn-api
+  ECR_REPO_UI: churn-ui
+  ECS_CLUSTER: churn-cluster
+  ECS_SERVICE_API: churn-api-service
+  ECS_SERVICE_UI: churn-ui-service
+
+jobs:
+  # 1. TEST JOB
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      # Install uv
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          uv pip install --system .
+
+      - name: Run Tests
+        run: |
+          pytest tests/
+
+  # 2. DEPLOY JOB
+  build-and-deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # --- BUILD API ---
+      - name: Build and Push API
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.api
+          push: true
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_API }}:${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_API }}:latest
+
+      # --- BUILD UI ---
+      - name: Build and Push UI
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.ui
+          push: true
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_UI }}:${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_UI }}:latest
+
+      # --- DEPLOY API ---
+      # This step will FAIL initially (ServiceNotFound) - Ignore it for now!
+      - name: Deploy API Service
+        continue-on-error: true  # Allow pipeline to finish even if service doesn't exist yet
+        run: |
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ env.ECS_SERVICE_API }} \
+            --force-new-deployment
+
+      # --- DEPLOY UI ---
+      # This step will FAIL initially (ServiceNotFound) - Ignore it for now!
+      - name: Deploy UI Service
+        continue-on-error: true
+        run: |
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ env.ECS_SERVICE_UI }} \
+            --force-new-deployment
