@@ -12,9 +12,10 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 WORKDIR /app
 
 # Copy dependency definition AND metadata files
+# Copy dependency definition AND metadata files
 COPY pyproject.toml .
-# COPY README.md . 
-# COPY LICENSE .
+COPY README.md . 
+COPY LICENSE .
 
 # Install dependencies from pyproject.toml (avoids installing 'src' package yet)
 RUN uv pip install --system -r pyproject.toml
