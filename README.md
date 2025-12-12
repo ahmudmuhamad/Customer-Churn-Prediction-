@@ -100,8 +100,8 @@ graph LR
 
 1.  **Clone the repository**:
     ```bash
-    git clone https://github.com/ahmudmuhamad/Customer-Churn-Prediction.git
-    cd Customer-Churn-Prediction
+    git clone https://github.com/ahmudmuhamad/Customer-Churn-Prediction-.git
+    cd Customer-Churn-Prediction-
     ```
 
 2.  **Install Dependencies**:
@@ -137,8 +137,6 @@ python src/training_pipeline/eval.py
 Start the FastAPI server locally:
 
 ```bash
-make run-api
-# OR
 uvicorn src.app.main:app --reload
 ```
 
@@ -150,8 +148,6 @@ uvicorn src.app.main:app --reload
 Launch the Streamlit Interface:
 
 ```bash
-make run-ui
-# OR
 streamlit run src/app_ui/home.py
 ```
 
